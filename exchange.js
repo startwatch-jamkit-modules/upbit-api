@@ -1,12 +1,14 @@
 var module = (function() {
     const request = include("./request.js");
+    
+    var _proxy = "";
 
     return {
         get_balances: function(credential) {
             return new Promise(function(resolve, reject) {
                 var url = "https://api.upbit.com/v1/accounts";
 
-                request.get(url, {}, credential)
+                request.get(url, {}, credential, _proxy)
                     .then(function(data) {
                         var balances = data.reduce(function(map, entry) {
                             return Object.assign(map, {
@@ -40,7 +42,7 @@ var module = (function() {
                     "price": price.toString()
                 };
                 
-                request.post(url, params, credential)
+                request.post(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
                     })
@@ -60,7 +62,7 @@ var module = (function() {
                     "price": price.toString()
                 };
 
-                request.post(url, params, credential)
+                request.post(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
                     })
@@ -81,7 +83,7 @@ var module = (function() {
                     "price": price.toString()
                 };
 
-                request.post(url, params, credential)
+                request.post(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
                     })
@@ -101,7 +103,7 @@ var module = (function() {
                     "price": price.toString()
                 };
                 
-                request.post(url, params, credential)
+                request.post(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
                     })
@@ -118,7 +120,7 @@ var module = (function() {
                     "uuid": uuid
                 };
 
-                request.get(url, params, credential)
+                request.get(url, params, credential, _proxy)
                     .then(function(result) {
                         if (result.length > 0 && result[0]["uuid"] === uuid) {
                             resolve(result[0]);
@@ -139,7 +141,7 @@ var module = (function() {
                     "uuid": uuid
                 };
 
-                request.delete(url, params, credential)
+                request.delete(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
                     })
@@ -183,6 +185,10 @@ var module = (function() {
             }
 
             return Math.round(price / 0.01) * 0.01;
+        },
+        
+        set_proxy: function(proxy) {
+            _proxy = proxy;
         },
     }
 })();

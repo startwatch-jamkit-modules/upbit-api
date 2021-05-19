@@ -2,6 +2,22 @@ var module = (function() {
     const crypto  = require("crypto"),
           jwt     = require("jwt");
 
+    function _send_request(url, options, proxy) {
+        if (proxy) {
+            return fetch(proxy, {
+                method: "POST",
+                body: JSON.stringify(Object.assign({
+                    url: url
+                }, options || {})),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+        }
+
+        return fetch(url, options);
+    }
+
     function _to_query_string(params) {
         return Object.keys(params).map(function(k) {
             return k + "=" + params[k];
@@ -32,7 +48,7 @@ var module = (function() {
     }
 
     return {
-        get: function(url, params, credential) {
+        get: function(url, params, credential, proxy) {
             var query = _to_query_string(params || {});
             var headers = {
                 "Accept": "application/json"
@@ -42,9 +58,10 @@ var module = (function() {
                 headers["Authorization"] = "Bearer " + _sign_query(credential, query);
             }
 
-            return fetch(url + "?" + query, {
+            return _send_request(url + "?" + query, {
+                method: "GET",
                 headers: headers
-            })
+            }, proxy)
                 .then(function(response) {
                     if (response.ok) {
                         return response.json();
@@ -57,7 +74,7 @@ var module = (function() {
                 });
         },
 
-        post: function(url, params, credential) {
+        post: function(url, params, credential, proxy) {
             var query = _to_query_string(params || {});
             var headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -68,11 +85,11 @@ var module = (function() {
                 headers["Authorization"] = "Bearer " + _sign_query(credential, query);
             }
 
-            return fetch(url, {
+            return _send_request(url, {
                 method: "POST",
                 body: query,
                 headers: headers
-            })
+            }, proxy)
                 .then(function(response) {
                     if (response.ok) {
                         return response.json();
@@ -85,7 +102,7 @@ var module = (function() {
                 });
         },
 
-        delete: function(url, params, credential) {
+        delete: function(url, params, credential, proxy) {
             var query = _to_query_string(params || {});
             var headers = {
                 "Accept": "application/json"
@@ -95,13 +112,10 @@ var module = (function() {
                 headers["Authorization"] = "Bearer " + _sign_query(credential, query);
             }
 
-            console.log(query)
-            console.log(JSON.stringify(headers))
-
-            return fetch(url + "?" + query, {
+            return _send_request(url + "?" + query, {
                 method: "DELETE",
                 headers: headers
-            })
+            }, proxy)
                 .then(function(response) {
                     if (response.ok) {
                         return response.json();
