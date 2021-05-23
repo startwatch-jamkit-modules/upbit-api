@@ -9,6 +9,8 @@ var module = (function() {
             if (proxy) {
                 exchange.set_proxy(proxy);
             }
+
+            return this;
         }
     }, quotation, exchange);
 })();
