@@ -113,27 +113,6 @@ var module = (function() {
             });
         },
 
-        get_order: function(credential, uuid) {
-            return new Promise(function(resolve, reject) {
-                var url = "https://api.upbit.com/v1/orders";
-                var params = {
-                    "uuid": uuid
-                };
-
-                request.get(url, params, credential, _proxy)
-                    .then(function(result) {
-                        if (result.length > 0 && result[0]["uuid"] === uuid) {
-                            resolve(result[0]);
-                        } else {
-                            resolve();
-                        }
-                    })
-                    .catch(function(error) {
-                        reject(error);
-                    });
-            });
-        },
-
         cancel_order: function(credential, uuid) {
             return new Promise(function(resolve, reject) {
                 var url = "https://api.upbit.com/v1/order";
@@ -144,6 +123,54 @@ var module = (function() {
                 request.delete(url, params, credential, _proxy)
                     .then(function(result) {
                         resolve(result);
+                    })
+                    .catch(function(error) {
+                        reject(error);
+                    });
+            });
+        },
+
+        get_order: function(credential, uuid) {
+            return new Promise(function(resolve, reject) {
+                var url = "https://api.upbit.com/v1/order";
+                var params = {
+                    "uuid": uuid
+                };
+
+                request.get(url, params, credential, _proxy)
+                    .then(function(data) {
+                        resolve(data);
+                    })
+                    .catch(function(error) {
+                        reject(error);
+                    });
+            });
+        },
+
+        get_pending_orders: function(credential, market) {
+            return new Promise(function(resolve, reject) {
+                var url = "https://api.upbit.com/v1/orders";
+                var params = {
+                    "market": market,
+                    "state": "wait"
+                };
+
+                request.get(url, params, credential, _proxy)
+                    .then(function(data) {
+                        var orders = data.reduce(function(map, entry) {
+                            return Object.assign(map, {
+                                [entry["uuid"]]: Object.keys(entry).filter(function(key) {
+                                    return key !== "uuid";
+                                })
+                                .reduce(function(map, key) {
+                                    return Object.assign(map, {
+                                        [key]: entry[key]
+                                    });
+                                }, {})
+                            });
+                        }, {});
+
+                        resolve(orders);
                     })
                     .catch(function(error) {
                         reject(error);
